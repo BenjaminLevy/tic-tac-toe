@@ -1,0 +1,37 @@
+class Game{
+  constructor(){
+    this.board = {
+      a:["_","_","_"],
+      b:["_","_","_"],
+      c:["_","_","_"]
+    }
+    this.player = 'x'
+  }
+
+  printBoard(){
+    console.table(this.board)
+  }
+}
+
+const repl = require('node:repl');
+
+console.log("TERMINAL TAC TOE")
+
+const r = repl.start({ prompt: '> ', eval: myEval});
+
+const currGame = new Game()
+
+function myEval(cmd, context, filename, callback) {
+  callback(null, play(cmd));
+}
+
+/* const options = { useColors: true } */
+
+
+const play = (move) => {
+ currGame.printBoard()
+
+}
+
+
+
