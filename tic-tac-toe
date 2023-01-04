@@ -6,10 +6,30 @@ class Game{
       c:["_","_","_"]
     }
     this.player = 'x'
+    this.promptPlayer() 
+    this.printBoard()
   }
 
   printBoard(){
     console.table(this.board)
+  }
+  promptPlayer(){
+    console.log(`Player ${this.player}, it's your turn. Please make a move:`)
+      parseCommand(input){
+        if(cmd.len != 2){
+          throw new Error("Move should only be two characters")
+        }
+        cmd = cmd.sort()
+          let column, row = input[0], input[1]
+          return column, row
+      }
+    play(cmd){
+  }
+    column, row = this.parseCommand(cmd)
+    console.log(column, "----", row)
+    this.player = this.player === 'x'
+      ? 'y'
+      : 'x'
   }
 }
 
@@ -19,19 +39,15 @@ console.log("TERMINAL TAC TOE")
 
 const r = repl.start({ prompt: '> ', eval: myEval});
 
-const currGame = new Game()
+const game = new Game()
 
 function myEval(cmd, context, filename, callback) {
-  callback(null, play(cmd));
+  callback(null, game.play(cmd));
 }
 
 /* const options = { useColors: true } */
 
 
-const play = (move) => {
- currGame.printBoard()
-
-}
 
 
 
