@@ -1,11 +1,17 @@
 class Game{
-  constructor(){
-    this.board = {
+
+    newBoard = {
       a:["_","_","_"],
       b:["_","_","_"],
       c:["_","_","_"]
     }
-    this.player = 'x'
+
+  constructor(){
+    this.currentPlayer = 'x'
+    initializeGame()
+  }
+  initializeGame(){
+    this.board = this.newBoard
     this.promptPlayer() 
     this.printBoard()
   }
@@ -14,22 +20,63 @@ class Game{
     console.table(this.board)
   }
   promptPlayer(){
-    console.log(`Player ${this.player}, it's your turn. Please make a move:`)
-      parseCommand(input){
-        if(cmd.len != 2){
-          throw new Error("Move should only be two characters")
-        }
-        cmd = cmd.sort()
-          let column, row = input[0], input[1]
-          return column, row
-      }
-    play(cmd){
+    console.log(`Player ${this.currentPlayer}, it's your turn. Please make a move:`)
   }
-    column, row = this.parseCommand(cmd)
-    console.log(column, "----", row)
-    this.player = this.player === 'x'
-      ? 'y'
+ 
+  play(input){
+    let column, row
+
+    [ column, row ] = this.parseCommand(input)
+    this.makeMove(column,row)
+    this.checkForWinner()
+    this.currentPlayer = this.currentPlayer === 'x'
+      ? 'o'
       : 'x'
+    this.promptPlayer()
+    this.printBoard()
+ } 
+  parseCommand(input){
+
+    /* Node REPL command adds a new line when you hit enter, */
+    /* so it is stripped out here */
+    input = input.trim("\n")
+
+    if(input.length != 2){
+      console.log(input)
+      throw new Error("Move should only be two characters")
+    }
+      input = input.split("")
+      input.sort()
+      return [input[0], input[1]]
+  }
+  
+  makeMove(column,row){
+   this.board[row][column]  = this.currentPlayer
+  }
+  checkForWinner(){
+    let winnerExists = false
+    if(
+      this.checkColumns()
+      || this.checkRows()
+      || this.checkDiagonals() 
+      ){
+      winnerExists = true
+    }
+    if(winnerExists){
+      this.announceWinner()
+      this.initializeGame()
+    }
+  }
+  checkColumns(){
+    for(let column = 0; column < 3; column++){
+       for(let rowChar = 97; rowChar <100; row ++){
+          
+       }
+    }
+  }
+  announceWinner(){
+    console.log(`CONGRATULATIONS TO PLAYER ${this.currentPlayer}`)
+    console.log('YOU WIN!!!!')
   }
 }
 
@@ -37,7 +84,7 @@ const repl = require('node:repl');
 
 console.log("TERMINAL TAC TOE")
 
-const r = repl.start({ prompt: '> ', eval: myEval});
+const r = repl.start({ prompt: '> ', eval: myEval, ignoreUndefined: true});
 
 const game = new Game()
 
