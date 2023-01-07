@@ -1,3 +1,6 @@
+const cloneDeep = require("lodash.clonedeep")
+const balloons = require("./assci.js").balloons
+
 class Game{
 
     newBoard = {
@@ -8,10 +11,16 @@ class Game{
 
   constructor(){
     this.currentPlayer = 'x'
-    initializeGame()
+    this.initializeGame()
   }
   initializeGame(){
-    this.board = this.newBoard
+    this.board = cloneDeep(this.newBoard)
+    this.available = cloneDeep(this.newBoard)
+    this.availableMoves = {
+      "a0":true,"a1":true, "a2":true,
+      "b0":true, "b1":true, "b2":true,
+      "c0":true,"c1":true, "c2":true  
+    }
     this.promptPlayer() 
     this.printBoard()
   }
@@ -24,16 +33,29 @@ class Game{
   }
  
   play(input){
+    try{
     let column, row
 
     [ column, row ] = this.parseCommand(input)
-    this.makeMove(column,row)
-    this.checkForWinner()
-    this.currentPlayer = this.currentPlayer === 'x'
-      ? 'o'
-      : 'x'
-    this.promptPlayer()
-    this.printBoard()
+    let [ isValidMove, error ] = this.makeMove(column,row)
+    /* if(!isValidMove){ */
+    /*   console.log(error) */
+    /*   return */
+    /* } */
+    if(this.checkForWinner()){
+      this.announceWinner()
+      this.initializeGame()
+    }else{
+      this.currentPlayer = this.currentPlayer === 'x'
+        ? 'o'
+        : 'x'
+      this.promptPlayer()
+      this.printBoard()
+    }
+    } catch(e) {
+      console.log(e.message)
+      return
+    }
  } 
   parseCommand(input){
 
@@ -47,36 +69,83 @@ class Game{
     }
       input = input.split("")
       input.sort()
-      return [input[0], input[1]]
+      return [input[0], input[1]] // returns [ column, row ]
   }
   
   makeMove(column,row){
-   this.board[row][column]  = this.currentPlayer
+    let awaitingValidMove = true
+    const rowAndColumn = row + column
+    if(this.availableMoves[rowAndColumn] === false){
+      throw new Error( "This move has been made already. Please pick another:")
+    }
+    if(this.availableMoves[rowAndColumn] === undefined){
+      return [ 
+        false, 
+        `This is not a valid move.\nPlease pick an unfilled row and column in the ranges "a" through "c" and 0 through 2:`
+      ]
+    }
+
+    /* while(awaitingValidMove){ */
+    /*  if(moveIsAvailable === true){ */
+    /*   awaitingValidMove = false */
+    /*  }else if(moveIsAvailable === false){ */
+    /*   console.log("This move has been made already. Please pick another:") */
+    /*  }else{ */
+    /*   console.log(`This is not a valid move.\n Please pick an unfilled row and column in the ranges "a" through "c" and 0 through 2:`) */
+    /*  } */
+    /* } */
+    this.availableMoves[rowAndColumn] = false
+    this.board[row][column] = this.currentPlayer
+    return [true, undefined]
+    
   }
   checkForWinner(){
-    let winnerExists = false
-    if(
+    return (
       this.checkColumns()
       || this.checkRows()
       || this.checkDiagonals() 
-      ){
-      winnerExists = true
-    }
-    if(winnerExists){
-      this.announceWinner()
-      this.initializeGame()
-    }
+      )
   }
   checkColumns(){
     for(let column = 0; column < 3; column++){
-       for(let rowChar = 97; rowChar <100; row ++){
-          
-       }
+      if(
+          this.board["a"][column] === this.currentPlayer // Ensure there isn't a match on an empty/unplayed row
+          && this.board["a"][column] === this.board["b"][column] 
+          && this.board["b"][column] === this.board["c"][column]
+        ){return true}
     }
+    return false
+  }
+  checkRows(){
+    for(let rowCharCode = 97; rowCharCode < 100; rowCharCode++){
+      let char = String.fromCharCode(rowCharCode)
+      if(
+          this.board[char][0] === this.currentPlayer // Ensure there isn't a match on an empty/unplayed row
+          && this.board[char][0] === this.board[char][1] 
+          && this.board[char][1] === this.board[char][2]
+        ){return true}
+    }
+    return false
+  }
+  checkDiagonals(){
+      if(
+          (
+            this.board["a"][0] === this.currentPlayer // Ensure there isn't a match on an empty/unplayed row
+            && this.board["a"][0] === this.board["b"][1] 
+            && this.board["b"][1] === this.board["c"][2]
+          )
+          ||(
+            this.board["a"][2] === this.currentPlayer // Ensure there isn't a match on an empty/unplayed row
+            && this.board["a"][2] === this.board["b"][1] 
+            && this.board["b"][1] === this.board["c"][0]
+          )
+        ){return true}
+    return false
   }
   announceWinner(){
     console.log(`CONGRATULATIONS TO PLAYER ${this.currentPlayer}`)
     console.log('YOU WIN!!!!')
+    console.log(balloons)
   }
 }
 
