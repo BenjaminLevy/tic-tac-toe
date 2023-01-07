@@ -1,21 +1,29 @@
-const cloneDeep = require("lodash.clonedeep")
+const repl = require('node:repl');
 const balloons = require("./assci.js").balloons
+const cloneDeep = require("lodash.clonedeep")
+
+const errorTooManyChars =  new Error("Move should only be two characters")
+const errorSpaceAlreadyFilled = new Error( "This space has been filled already. Please pick another:")
+const errorMoveOutsideRange = new Error( `Invalid move. Please pick an unfilled row and column in the ranges "a" through "c" and 0 through 2:`)
+
+const EMTPY_SPACE = "_"
 
 class Game{
 
     newBoard = {
-      a:["_","_","_"],
-      b:["_","_","_"],
-      c:["_","_","_"]
+      a:[EMPTY_SPACE,EMPTY_SPACE,EMPTY_SPACE],
+      b:[EMPTY_SPACE,EMPTY_SPACE,EMPTY_SPACE],
+      c:[EMPTY_SPACE,EMPTY_SPACE,EMPTY_SPACE]
     }
 
   constructor(){
-    this.currentPlayer = 'x'
     this.initializeGame()
   }
   initializeGame(){
+    this.currentPlayer = 'x'
     this.board = cloneDeep(this.newBoard)
-    this.available = cloneDeep(this.newBoard)
+
+    //TODO change to set
     this.availableMoves = {
       "a0":true,"a1":true, "a2":true,
       "b0":true, "b1":true, "b2":true,
@@ -34,14 +42,9 @@ class Game{
  
   play(input){
     try{
-    let column, row
+    let [ column, row ] = this.parseCommand(input)
+    this.makeMove(column,row)
 
-    [ column, row ] = this.parseCommand(input)
-    let [ isValidMove, error ] = this.makeMove(column,row)
-    /* if(!isValidMove){ */
-    /*   console.log(error) */
-    /*   return */
-    /* } */
     if(this.checkForWinner()){
       this.announceWinner()
       this.initializeGame()
@@ -64,8 +67,7 @@ class Game{
     input = input.trim("\n")
 
     if(input.length != 2){
-      console.log(input)
-      throw new Error("Move should only be two characters")
+      throw errorTooManyChars
     }
       input = input.split("")
       input.sort()
@@ -73,28 +75,15 @@ class Game{
   }
   
   makeMove(column,row){
-    let awaitingValidMove = true
     const rowAndColumn = row + column
     if(this.availableMoves[rowAndColumn] === false){
-      throw new Error( "This move has been made already. Please pick another:")
+      throw errorSpaceAlreadyFilled
     }
     if(this.availableMoves[rowAndColumn] === undefined){
-      return [ 
-        false, 
-        `This is not a valid move.\nPlease pick an unfilled row and column in the ranges "a" through "c" and 0 through 2:`
-      ]
+      throw errorMoveOutsideRange
     }
-
-    /* while(awaitingValidMove){ */
-    /*  if(moveIsAvailable === true){ */
-    /*   awaitingValidMove = false */
-    /*  }else if(moveIsAvailable === false){ */
-    /*   console.log("This move has been made already. Please pick another:") */
-    /*  }else{ */
-    /*   console.log(`This is not a valid move.\n Please pick an unfilled row and column in the ranges "a" through "c" and 0 through 2:`) */
-    /*  } */
-    /* } */
     this.availableMoves[rowAndColumn] = false
+
     this.board[row][column] = this.currentPlayer
     return [true, undefined]
     
@@ -143,13 +132,13 @@ class Game{
     return false
   }
   announceWinner(){
+    console.log(balloons)
     console.log(`CONGRATULATIONS TO PLAYER ${this.currentPlayer}`)
     console.log('YOU WIN!!!!')
-    console.log(balloons)
+    console.log("New game starting...")
   }
 }
 
-const repl = require('node:repl');
 
 console.log("TERMINAL TAC TOE")
 
@@ -160,8 +149,6 @@ const game = new Game()
 function myEval(cmd, context, filename, callback) {
   callback(null, game.play(cmd));
 }
-
-/* const options = { useColors: true } */
 
 
 

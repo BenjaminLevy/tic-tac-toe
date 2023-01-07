@@ -1,0 +1,31 @@
+1. branching tree structure which always chooses the option with greatest number of win states
+or soonest win state
+  - effectiveness of this approach is predicated on the opponent choosing randomly
+
+2. for each move, iterate through open squares and calculate effectiveness score for each.
+  - any move which would win the game has point value of infinity
+  - next highest points awarded for blocking a winning move from opponent
+  - moves which put player one move away from a win award higher points
+  - corner/center moves award more than other moves
+  - on the 1st or 2nd move of the game, play corner or center, respectively
+ 
+3. map with each possible layout as key
+  - can hash layout for better performance/smaller size
+  - can represent each layout as 18 bits
+    - each set of two bits represents a single square's state
+      e.g. 00 == unplayed, 01 == opponent played, 11 == AI played
+  - for each layout, map provides precomputed best move
+    - less space-efficient but faster than computing during play
+  - space consideration:
+    - I believe possible game states would be 
+      (number of possible states per square)^(number of squares - 2)
+      (the -2 comes from not needing to store game states where 8 squares
+        are filled, as there is only one move in this situation)
+      == 3^7
+      == 2,187 states
+      == 2,187 * 18 bits
+      == 39,366 
+      == 39,366 / 1024
+      == ~ 39kb
+    - further optimizations could perhaps be made by accounting for states which 
+      are mirrored/rotated images of other states
